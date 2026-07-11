@@ -32,11 +32,8 @@ export default function Home() {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const apiKey = process.env.NEXT_PUBLIC_API_KEY || "";
-  const headers: Record<string, string> = apiKey ? { "X-API-Key": apiKey } : {};
-
   useEffect(() => {
-    fetch("/api/v1/dashboard?organization_id=1", { headers })
+    fetch("/api/v1/dashboard?organization_id=1")
       .then((res) => res.json())
       .then((data) => setDashboard(data))
       .catch(() => setDashboard(null));
@@ -52,7 +49,7 @@ export default function Home() {
     try {
       const res = await fetch("/api/v1/chat", {
         method: "POST",
-        headers: { "Content-Type": "application/json", ...headers },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ message: userMessage }),
       });
       const data = await res.json();

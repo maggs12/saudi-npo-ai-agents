@@ -13,6 +13,7 @@ from app.services.volunteer_service import (
     log_hours,
     match_volunteers,
     register_volunteer,
+    resolve_opportunity_id,
 )
 
 
@@ -119,7 +120,10 @@ class VolunteerAgent:
             opportunity_id = payload.get("opportunity_id")
             if volunteer_id is None:
                 return {"agent": self.name, "error": "volunteer_id is required"}
-            cert = issue_certificate(session, volunteer_id, opportunity_id)
+            resolved_id = resolve_opportunity_id(session, volunteer_id, opportunity_id)
+            if resolved_id is None:
+                return {"agent": self.name, "error": "no enrollment found for volunteer"}
+            cert = issue_certificate(session, volunteer_id, resolved_id)
             if cert is None:
                 return {"agent": self.name, "error": "no enrollment found for volunteer"}
             return {"agent": self.name, "action": "issue_certificate", "certificate": cert}

@@ -129,27 +129,42 @@ def get_total_hours(session: Session, volunteer_id: int) -> float:
     return result or 0.0
 
 
-def issue_certificate(
+def resolve_opportunity_id(
     session: Session, volunteer_id: int, opportunity_id: int | None = None
-) -> dict[str, Any] | None:
-    from sqlalchemy import func
+) -> int | None:
+    """Return the opportunity_id to use for a volunteer certificate.
 
+    If an opportunity_id is supplied, validate that the volunteer is enrolled.
+    Otherwise fall back to the volunteer's first enrollment.
+    """
     if opportunity_id is None:
         enrollment = session.exec(
             select(VolunteerEnrollment).where(VolunteerEnrollment.volunteer_id == volunteer_id)
         ).first()
-        if not enrollment:
-            return None
-        opportunity_id = enrollment.opportunity_id
-    else:
-        enrollment = session.exec(
-            select(VolunteerEnrollment).where(
-                VolunteerEnrollment.volunteer_id == volunteer_id,
-                VolunteerEnrollment.opportunity_id == opportunity_id,
-            )
-        ).first()
-        if not enrollment:
-            return None
+        return enrollment.opportunity_id if enrollment else None
+
+    enrollment = session.exec(
+        select(VolunteerEnrollment).where(
+            VolunteerEnrollment.volunteer_id == volunteer_id,
+            VolunteerEnrollment.opportunity_id == opportunity_id,
+        )
+    ).first()
+    return opportunity_id if enrollment else None
+
+
+def issue_certificate(
+    session: Session, volunteer_id: int, opportunity_id: int
+) -> dict[str, Any] | None:
+    from sqlalchemy import func
+
+    enrollment = session.exec(
+        select(VolunteerEnrollment).where(
+            VolunteerEnrollment.volunteer_id == volunteer_id,
+            VolunteerEnrollment.opportunity_id == opportunity_id,
+        )
+    ).first()
+    if not enrollment:
+        return None
 
     stmt = select(func.sum(VolunteerHour.hours)).where(
         VolunteerHour.volunteer_id == volunteer_id,

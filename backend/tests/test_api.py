@@ -7,7 +7,8 @@ client = TestClient(app, headers={"X-API-Key": "test-key"})
 
 
 def test_health():
-    response = client.get("/api/v1/health")
+    public_client = TestClient(app)
+    response = public_client.get("/api/v1/health")
     assert response.status_code == 200
     assert response.json()["status"] == "ok"
 

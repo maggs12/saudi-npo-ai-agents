@@ -145,8 +145,13 @@ def register_volunteer(data: dict[str, Any], session: Session = Depends(get_sess
 
 @router.post("/certificates")
 def issue_certificate(data: CertificateIssue, session: Session = Depends(get_session)) -> dict[str, Any] | None:
-    cert = volunteer_service.issue_certificate(
+    opportunity_id = volunteer_service.resolve_opportunity_id(
         session, data.volunteer_id, data.opportunity_id
+    )
+    if opportunity_id is None:
+        raise HTTPException(status_code=400, detail="Could not issue certificate")
+    cert = volunteer_service.issue_certificate(
+        session, data.volunteer_id, opportunity_id
     )
     if not cert:
         raise HTTPException(status_code=400, detail="Could not issue certificate")

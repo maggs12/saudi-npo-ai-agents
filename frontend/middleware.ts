@@ -6,7 +6,7 @@ export function middleware(request: NextRequest) {
   // This keeps the API key out of the browser and client-side code.
   const apiKey = process.env.API_KEY;
   if (!apiKey) {
-    return NextResponse.next();
+    return NextResponse.json({ error: "API key not configured" }, { status: 500 });
   }
 
   const headers = new Headers(request.headers);

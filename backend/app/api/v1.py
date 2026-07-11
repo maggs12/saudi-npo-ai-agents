@@ -14,6 +14,7 @@ from app.database import create_db_and_tables, get_session
 from app.schemas import (
     AgentRunRequest,
     BudgetCreate,
+    CertificateIssue,
     ChatRequest,
     OpportunityCreate,
     ProgramCreate,
@@ -143,9 +144,9 @@ def register_volunteer(data: dict[str, Any], session: Session = Depends(get_sess
 
 
 @router.post("/certificates")
-def issue_certificate(data: dict[str, Any], session: Session = Depends(get_session)) -> dict[str, Any] | None:
+def issue_certificate(data: CertificateIssue, session: Session = Depends(get_session)) -> dict[str, Any] | None:
     cert = volunteer_service.issue_certificate(
-        session, data["volunteer_id"], data.get("opportunity_id")
+        session, data.volunteer_id, data.opportunity_id
     )
     if not cert:
         raise HTTPException(status_code=400, detail="Could not issue certificate")

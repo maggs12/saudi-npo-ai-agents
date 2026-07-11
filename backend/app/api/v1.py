@@ -9,6 +9,7 @@ from app.agents.orchestrator import get_orchestrator
 from app.agents.program_agent import program_agent
 from app.agents.reporting_agent import reporting_agent
 from app.agents.volunteer_agent import volunteer_agent
+from app.dependencies import api_key_header
 from app.database import create_db_and_tables, get_session
 from app.schemas import (
     AgentRunRequest,
@@ -22,12 +23,7 @@ from app.schemas import (
 )
 from app.services import finance_service, program_service, regulation_service, reporting_service, volunteer_service
 
-router = APIRouter(prefix="/api/v1")
-
-
-@router.get("/health")
-def health() -> dict[str, str]:
-    return {"status": "ok"}
+router = APIRouter(prefix="/api/v1", dependencies=[Depends(api_key_header)])
 
 
 @router.post("/chat")

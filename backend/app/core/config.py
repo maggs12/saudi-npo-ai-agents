@@ -18,6 +18,7 @@ class Settings(BaseSettings):
     # Security
     secret_key: str = "change-me"
     encryption_key: str | None = None
+    api_key: str | None = None
 
     # LLM
     llm_provider: Literal["openai", "ollama", "mock"] = "mock"

@@ -1,3 +1,4 @@
+import re
 from datetime import date
 from typing import Any
 
@@ -28,18 +29,28 @@ class VolunteerAgent:
             return self.run_direct(session, {"action": "list"})
 
         if any(k in text for k in ["match", "مطابقة", "مناسب", "مهارة"]):
-            # try to find opportunity id
-            import re
-
             match = re.search(r"\d+", message)
             opp_id = int(match.group()) if match else None
             return self.run_direct(session, {"action": "match", "opportunity_id": opp_id})
 
         if any(k in text for k in ["ساعات", "hours", "توثيق"]):
-            return self.run_direct(session, {"action": "total_hours"})
+            match = re.search(r"\d+", message)
+            volunteer_id = int(match.group()) if match else None
+            return self.run_direct(session, {"action": "total_hours", "volunteer_id": volunteer_id})
 
         if any(k in text for k in ["شهادة", "certificate"]):
-            return self.run_direct(session, {"action": "issue_certificate"})
+            numbers = re.findall(r"\d+", message)
+            if len(numbers) >= 2:
+                volunteer_id, opportunity_id = int(numbers[0]), int(numbers[1])
+            elif len(numbers) == 1:
+                volunteer_id = int(numbers[0])
+                opportunity_id = None
+            else:
+                volunteer_id = opportunity_id = None
+            return self.run_direct(
+                session,
+                {"action": "issue_certificate", "volunteer_id": volunteer_id, "opportunity_id": opportunity_id},
+            )
 
         if any(k in text for k in ["فرصة", "opportunity", "فرص"]):
             return self.run_direct(session, {"action": "list_opportunities"})

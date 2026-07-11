@@ -26,11 +26,9 @@ def get_fernet() -> Fernet:
                 hashlib.sha256(settings.secret_key.encode()).digest()
             )
             key = derived.decode()
-        try:
-            _fernet = Fernet(key.encode() if isinstance(key, str) else key)
-        except Exception as exc:
-            # Fallback: generate a random key. Note: existing encrypted data will be lost.
-            _fernet = Fernet(Fernet.generate_key())
+        if isinstance(key, str):
+            key = key.encode()
+        _fernet = Fernet(key)
     return _fernet
 
 

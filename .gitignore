@@ -1,0 +1,15 @@
+.env
+.venv
+__pycache__/
+*.pyc
+.pytest_cache/
+node_modules/
+.next/
+out/
+dist/
+*.log
+reports/
+.DS_Store
+.vscode/
+.idea/
+uv.lock

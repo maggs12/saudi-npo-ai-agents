@@ -69,7 +69,7 @@ class ReportingAgent:
                 "action": "generate",
                 "report": report.model_dump(),
                 "file_path": report.file_path,
-                "download_url": f"/api/v1/reports/download/{report.id}",
+                "download_url": f"/api/v1/reports/{report.id}/download",
             }
 
         return {"agent": self.name, "error": "unknown action"}

@@ -9,6 +9,7 @@ from sqlmodel import Session
 os.environ.setdefault("DATABASE_URL", "postgresql://postgres:postgres@localhost:5432/npo_ai_test")
 os.environ.setdefault("LLM_PROVIDER", "mock")
 os.environ.setdefault("EMBEDDING_PROVIDER", "mock")
+os.environ.setdefault("API_KEY", "test-key")
 
 from app.database import SessionLocal, create_db_and_tables, engine  # noqa: E402
 from app.seed import seed_data  # noqa: E402

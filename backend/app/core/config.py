@@ -1,6 +1,7 @@
 from pathlib import Path
 from typing import Literal
 
+from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -18,6 +19,7 @@ class Settings(BaseSettings):
     # Security
     secret_key: str = "change-me"
     encryption_key: str | None = None
+    api_key: str = Field(min_length=1)
 
     # LLM
     llm_provider: Literal["openai", "ollama", "mock"] = "mock"

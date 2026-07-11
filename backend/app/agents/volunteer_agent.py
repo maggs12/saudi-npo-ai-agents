@@ -1,3 +1,4 @@
+import re
 from datetime import date
 from typing import Any
 
@@ -12,6 +13,7 @@ from app.services.volunteer_service import (
     log_hours,
     match_volunteers,
     register_volunteer,
+    resolve_opportunity_id,
 )
 
 
@@ -28,18 +30,28 @@ class VolunteerAgent:
             return self.run_direct(session, {"action": "list"})
 
         if any(k in text for k in ["match", "مطابقة", "مناسب", "مهارة"]):
-            # try to find opportunity id
-            import re
-
             match = re.search(r"\d+", message)
             opp_id = int(match.group()) if match else None
             return self.run_direct(session, {"action": "match", "opportunity_id": opp_id})
 
         if any(k in text for k in ["ساعات", "hours", "توثيق"]):
-            return self.run_direct(session, {"action": "total_hours"})
+            match = re.search(r"\d+", message)
+            volunteer_id = int(match.group()) if match else None
+            return self.run_direct(session, {"action": "total_hours", "volunteer_id": volunteer_id})
 
         if any(k in text for k in ["شهادة", "certificate"]):
-            return self.run_direct(session, {"action": "issue_certificate"})
+            numbers = re.findall(r"\d+", message)
+            if len(numbers) >= 2:
+                volunteer_id, opportunity_id = int(numbers[0]), int(numbers[1])
+            elif len(numbers) == 1:
+                volunteer_id = int(numbers[0])
+                opportunity_id = None
+            else:
+                volunteer_id = opportunity_id = None
+            return self.run_direct(
+                session,
+                {"action": "issue_certificate", "volunteer_id": volunteer_id, "opportunity_id": opportunity_id},
+            )
 
         if any(k in text for k in ["فرصة", "opportunity", "فرص"]):
             return self.run_direct(session, {"action": "list_opportunities"})
@@ -106,9 +118,14 @@ class VolunteerAgent:
         if action == "issue_certificate":
             volunteer_id = payload.get("volunteer_id")
             opportunity_id = payload.get("opportunity_id")
-            if volunteer_id is None or opportunity_id is None:
-                return {"agent": self.name, "error": "volunteer_id and opportunity_id required"}
-            cert = issue_certificate(session, volunteer_id, opportunity_id)
+            if volunteer_id is None:
+                return {"agent": self.name, "error": "volunteer_id is required"}
+            resolved_id = resolve_opportunity_id(session, volunteer_id, opportunity_id)
+            if resolved_id is None:
+                return {"agent": self.name, "error": "no enrollment found for volunteer"}
+            cert = issue_certificate(session, volunteer_id, resolved_id)
+            if cert is None:
+                return {"agent": self.name, "error": "no enrollment found for volunteer"}
             return {"agent": self.name, "action": "issue_certificate", "certificate": cert}
 
         return {"agent": self.name, "error": "unknown action"}

@@ -82,3 +82,8 @@ class ReportResponse(BaseModel):
     file_path: str | None = None
     download_url: str | None = None
     message: str
+
+
+class CertificateIssue(BaseModel):
+    volunteer_id: int
+    opportunity_id: int | None = None

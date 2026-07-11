@@ -49,6 +49,7 @@ docker compose up --build
 
 - `DATABASE_URL`: عنوان قاعدة البيانات.
 - `SECRET_KEY` و `ENCRYPTION_KEY`: مفاتيح التوقيع والتشفير.
+- `API_KEY`: مفتاح مشترك (shared secret) لحماية جميع مسارات `/api/v1` (ما عدا `/health`).
 - `LLM_PROVIDER`: `openai` | `ollama` | `mock`.
 - `EMBEDDING_PROVIDER`: `openai` | `fastembed` | `mock`.
 - `OPENAI_API_KEY`: عند استخدام OpenAI.

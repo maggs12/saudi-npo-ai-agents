@@ -33,7 +33,7 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    fetch("/api/dashboard?organization_id=1")
+    fetch("/api/v1/dashboard?organization_id=1")
       .then((res) => res.json())
       .then((data) => setDashboard(data))
       .catch(() => setDashboard(null));
@@ -47,7 +47,7 @@ export default function Home() {
     setLoading(true);
 
     try {
-      const res = await fetch("/api/chat", {
+      const res = await fetch("/api/v1/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ message: userMessage }),

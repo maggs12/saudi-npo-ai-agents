@@ -30,6 +30,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
+@app.get("/api/v1/health")
+def health() -> dict[str, str]:
+    return {"status": "ok"}
+
+
 app.include_router(v1.router)
 
 

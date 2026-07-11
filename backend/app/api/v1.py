@@ -9,10 +9,12 @@ from app.agents.orchestrator import get_orchestrator
 from app.agents.program_agent import program_agent
 from app.agents.reporting_agent import reporting_agent
 from app.agents.volunteer_agent import volunteer_agent
+from app.dependencies import api_key_header
 from app.database import create_db_and_tables, get_session
 from app.schemas import (
     AgentRunRequest,
     BudgetCreate,
+    CertificateIssue,
     ChatRequest,
     OpportunityCreate,
     ProgramCreate,
@@ -22,12 +24,7 @@ from app.schemas import (
 )
 from app.services import finance_service, program_service, regulation_service, reporting_service, volunteer_service
 
-router = APIRouter(prefix="/api/v1")
-
-
-@router.get("/health")
-def health() -> dict[str, str]:
-    return {"status": "ok"}
+router = APIRouter(prefix="/api/v1", dependencies=[Depends(api_key_header)])
 
 
 @router.post("/chat")
@@ -147,8 +144,15 @@ def register_volunteer(data: dict[str, Any], session: Session = Depends(get_sess
 
 
 @router.post("/certificates")
-def issue_certificate(data: dict[str, Any], session: Session = Depends(get_session)) -> dict[str, Any] | None:
-    cert = volunteer_service.issue_certificate(session, data["volunteer_id"], data["opportunity_id"])
+def issue_certificate(data: CertificateIssue, session: Session = Depends(get_session)) -> dict[str, Any] | None:
+    opportunity_id = volunteer_service.resolve_opportunity_id(
+        session, data.volunteer_id, data.opportunity_id
+    )
+    if opportunity_id is None:
+        raise HTTPException(status_code=400, detail="Could not issue certificate")
+    cert = volunteer_service.issue_certificate(
+        session, data.volunteer_id, opportunity_id
+    )
     if not cert:
         raise HTTPException(status_code=400, detail="Could not issue certificate")
     return cert

@@ -129,23 +129,33 @@ def get_total_hours(session: Session, volunteer_id: int) -> float:
     return result or 0.0
 
 
-def issue_certificate(session: Session, volunteer_id: int, opportunity_id: int) -> dict[str, Any] | None:
+def issue_certificate(
+    session: Session, volunteer_id: int, opportunity_id: int | None = None
+) -> dict[str, Any] | None:
     from sqlalchemy import func
+
+    if opportunity_id is None:
+        enrollment = session.exec(
+            select(VolunteerEnrollment).where(VolunteerEnrollment.volunteer_id == volunteer_id)
+        ).first()
+        if not enrollment:
+            return None
+        opportunity_id = enrollment.opportunity_id
+    else:
+        enrollment = session.exec(
+            select(VolunteerEnrollment).where(
+                VolunteerEnrollment.volunteer_id == volunteer_id,
+                VolunteerEnrollment.opportunity_id == opportunity_id,
+            )
+        ).first()
+        if not enrollment:
+            return None
 
     stmt = select(func.sum(VolunteerHour.hours)).where(
         VolunteerHour.volunteer_id == volunteer_id,
         VolunteerHour.opportunity_id == opportunity_id,
     )
     total = session.exec(stmt).first() or 0.0
-
-    enrollment = session.exec(
-        select(VolunteerEnrollment).where(
-            VolunteerEnrollment.volunteer_id == volunteer_id,
-            VolunteerEnrollment.opportunity_id == opportunity_id,
-        )
-    ).first()
-    if not enrollment:
-        return None
 
     enrollment.certificate_issued = True
     enrollment.status = "completed"

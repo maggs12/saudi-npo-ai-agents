@@ -117,9 +117,11 @@ class VolunteerAgent:
         if action == "issue_certificate":
             volunteer_id = payload.get("volunteer_id")
             opportunity_id = payload.get("opportunity_id")
-            if volunteer_id is None or opportunity_id is None:
-                return {"agent": self.name, "error": "volunteer_id and opportunity_id required"}
+            if volunteer_id is None:
+                return {"agent": self.name, "error": "volunteer_id is required"}
             cert = issue_certificate(session, volunteer_id, opportunity_id)
+            if cert is None:
+                return {"agent": self.name, "error": "no enrollment found for volunteer"}
             return {"agent": self.name, "action": "issue_certificate", "certificate": cert}
 
         return {"agent": self.name, "error": "unknown action"}

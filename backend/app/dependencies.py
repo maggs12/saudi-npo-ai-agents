@@ -14,7 +14,7 @@ def get_db():
 def api_key_header(request: Request) -> None:
     """Require X-API-Key when API_KEY is configured."""
     if not settings.api_key:
-        raise HTTPException(status_code=401, detail="API key not configured")
+        return
     provided = request.headers.get("X-API-Key") or ""
     if not hmac.compare_digest(provided, settings.api_key):
         raise HTTPException(status_code=401, detail="Invalid or missing API key")

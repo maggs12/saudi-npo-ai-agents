@@ -1,10 +1,8 @@
-import logging
 from pathlib import Path
 from typing import Literal
 
+from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
-
-logger = logging.getLogger(__name__)
 
 
 class Settings(BaseSettings):
@@ -21,7 +19,7 @@ class Settings(BaseSettings):
     # Security
     secret_key: str = "change-me"
     encryption_key: str | None = None
-    api_key: str | None = None
+    api_key: str = Field(min_length=1)
 
     # LLM
     llm_provider: Literal["openai", "ollama", "mock"] = "mock"
@@ -51,9 +49,6 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
-
-if not settings.api_key:
-    logger.warning("API_KEY is not set; /api/v1 routes will be unprotected.")
 
 # Ensure reports directory exists
 settings.reports_dir.mkdir(parents=True, exist_ok=True)

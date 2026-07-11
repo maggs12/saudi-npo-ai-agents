@@ -4,7 +4,7 @@ services:
     container_name: npo_ai_db
     restart: unless-stopped
     env_file:
-      - .env.example
+      - .env
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
@@ -26,7 +26,7 @@ services:
     container_name: npo_ai_backend
     restart: unless-stopped
     env_file:
-      - .env.example
+      - .env
     environment:
       DATABASE_URL: postgresql://postgres:postgres@db:5432/npo_ai
     ports:
@@ -46,7 +46,7 @@ services:
     container_name: npo_ai_frontend
     restart: unless-stopped
     env_file:
-      - .env.example
+      - .env
     environment:
       BACKEND_URL: http://backend:8000
     ports:
